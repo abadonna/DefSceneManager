@@ -1,0 +1,9 @@
+images {
+  image: "/scenes/intro/images/teresa_office.png"
+}
+images {
+  image: "/scenes/intro/images/teresa.png"
+}
+margin: 0
+extrude_borders: 0
+inner_padding: 0

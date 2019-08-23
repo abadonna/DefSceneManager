@@ -1,0 +1,13 @@
+local STATE = require "fabula.state" 
+
+function init(self)
+	-- Add initialization code here
+	-- Remove this function if not needed
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("state_changed") then
+		local node = gui.get_node("foo")
+		gui.set_text(node, "FOO:" .. STATE.FOO )
+	end
+end

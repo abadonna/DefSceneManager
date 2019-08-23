@@ -1,0 +1,74 @@
+--[[
+HELPER = {xoffset = 0, yoffset = 0, zoom_factor = 1}
+function HELPER.get_position(action)
+    return vmath.vector3(
+        HELPER.xoffset + action.screen_x / HELPER.zoom_factor,
+        HELPER.yoffset + action.screen_y / HELPER.zoom_factor, 0)
+end ]]--
+
+function init(self)
+    self.tile_pred = render.predicate({"tile"})
+    self.gui_pred = render.predicate({"gui"})
+    self.text_pred = render.predicate({"text"})
+    self.particle_pred = render.predicate({"particle"})
+
+    self.clear_color = vmath.vector4(0, 0, 0, 0)
+    self.clear_color.x = sys.get_config("render.clear_color_red", 0)
+    self.clear_color.y = sys.get_config("render.clear_color_green", 0)
+    self.clear_color.z = sys.get_config("render.clear_color_blue", 0)
+    self.clear_color.w = sys.get_config("render.clear_color_alpha", 0)
+
+    self.view = vmath.matrix4()
+end
+
+function update(self)
+    local original_width = 640
+    local original_height = 360
+    local current_width = render.get_window_width()
+    local current_height = render.get_window_height()
+
+    local zoom_factor = math.min(current_width / original_width, current_height / original_height)
+
+    local projected_width = current_width / zoom_factor
+    local projected_height = current_height / zoom_factor
+    local xoffset = -(projected_width - original_width) / 2
+    local yoffset = -(projected_height - original_height) / 2
+    
+    --HELPER.zoom_factor = zoom_factor
+    --HELPER.xoffset = xoffset
+    --HELPER.yoffset = yoffset
+
+    render.set_projection(vmath.matrix4_orthographic(xoffset, xoffset + projected_width, yoffset, yoffset + projected_height, -1, 1))
+
+    render.set_depth_mask(true)
+    render.set_stencil_mask(0xff)
+    render.clear({[render.BUFFER_COLOR_BIT] = self.clear_color, [render.BUFFER_DEPTH_BIT] = 1, [render.BUFFER_STENCIL_BIT] = 0})
+
+    render.set_viewport(0, 0, render.get_window_width(), render.get_window_height())
+    render.set_view(self.view)
+
+    render.set_depth_mask(false)
+    render.disable_state(render.STATE_DEPTH_TEST)
+    render.disable_state(render.STATE_STENCIL_TEST)
+    render.enable_state(render.STATE_BLEND)
+    render.set_blend_func(render.BLEND_SRC_ALPHA, render.BLEND_ONE_MINUS_SRC_ALPHA)
+    render.disable_state(render.STATE_CULL_FACE)
+
+    --render.set_projection(vmath.matrix4_orthographic(0, render.get_width(), 0, render.get_height(), -1, 1))
+
+    render.draw(self.tile_pred)
+    render.draw(self.particle_pred)
+    render.draw_debug3d()
+
+    render.set_view(vmath.matrix4())
+    render.set_projection(vmath.matrix4_orthographic(0, render.get_window_width(), 0, render.get_window_height(), -1, 1))
+
+    render.enable_state(render.STATE_STENCIL_TEST)
+    render.draw(self.gui_pred)
+    --render.draw(self.gui_pred_top)
+    render.draw(self.text_pred)
+    render.disable_state(render.STATE_STENCIL_TEST)
+
+    render.set_depth_mask(false)
+
+end

@@ -1,0 +1,64 @@
+return
+{ 
+-- any command supports multiple ids
+-- all params are optional
+-- commands can be combined {show="go1" hide="go2" speed=5} 
+-- script stops at text command and waits for click unless "pass" param is used
+
+	{hide 	= "go1,go2"}, 
+	{delete	= "go1"},
+	{scale 	= "go3", x = 1, speed = 15}, --scale works on #sprite by default, use target="." to scale GO
+	{scale 	= "go4, go5", x = 2, y = 3, speed = 15, target="#sprite2"}, 
+	{set 	= {test = true}}, -- set variable to check at any action
+	{show	= "go1", speed = 1, condition = {test = true}},
+	{show	= "go1", speed = 1, condition = {test_lt = 5}}, -- test < 5, _gt - >, _lte, _gte
+	{show	= "go1", speed = 1, condition = {test_lt = {"test2",2}}}, -- multiple test, test agains variable
+	{show	= "go1", speed = 1, condition_any = {test = true, test2 = true}}, -- true if any condition is true
+	{set	= {v1 = 1, v2 = "~2"}}, --- v2 is random in [0, 2]
+	{set	= {v1 = "+3"}}, --increment. -3 for decrement
+	{set 	= {qq = "xx"}},
+	{text 	= "blabl {qq} abla", speaker = "BOB", color = vmath.vector4(1,0,0,1)},
+	{text 	= "blablabla", speed = 0.05, pass = true},
+	{text 	= "blablabla", x = 100, y = 100, width = 200, speed = 0.05}, --for text bubbles
+	{text 	= "blablabla", x = 100, original = true}, --use main text panel
+	{text 	= "blablabla", x = 100, y = 100, width = 200, template = "panel", 
+		animate = {
+			{prop = "opacity", from = 0, to = 1, speed = 1},
+			{prop = "scale", from = 0.1, to = 1, speed = 1, easing = gui.EASING_INBACK}
+		}
+	},
+	{clear 	= "all"}, -- removes all text
+	{move 	= "go1", x = 20, speed = 0.5}, 
+	{goto	= "label1"},
+	{label 	= "label1"},
+	{delay 	= 1},
+	{select	= 
+		{
+			{text = "item 1", x = 200, y = 200, width = 300},
+			{text = "item 2", offset = {x = 0, y = 100}, action = {goto = "label"}},
+			{text = "item 3", template = "select2", speed = 1, delay = 1}
+		},
+		speed = 0.5, delay = 1, random = true, spacing = 20
+	},
+	{msg	= "enable", target = "go"}, -- send any message
+	{scene 	= "next", keep = true, action = {goto="label"}},
+	{unload	= "intro"}, -- if previous scene wasnt replaced with "scene" command
+	{url	= "http://google.com"},
+	{url 	= "google.com", blank = true},
+	
+	{save	= "slot1"}, -- save and load state
+	{load	= "slot1"},
+	{portrait = "michael", animate = { --display portrait with effect
+		{prop = "opacity", from = 0, to = 1, speed = 0.5},
+		{prop = "move", from = {x = 0}, to = {x=50}, speed = 0.5}}
+	},
+	{portrait = "", animate = { --hide portrait with fade
+		{prop = "opacity", from = 1, to = 0, speed = 0.5}}
+	},
+	{text_move = {x = 300}}, -- alternative way to move main text panel
+	{text_restore = true}, -- restore main text panel to origianl position
+	
+}
+
+-- scripts should be in "/story" folder
+-- scenes should be in collection proxies

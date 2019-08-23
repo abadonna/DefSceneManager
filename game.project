@@ -1,0 +1,29 @@
+[project]
+title = DefSceneManager
+version = 1.0
+custom_resources = story/
+
+[bootstrap]
+main_collection = /main/main.collectionc
+render = /main/custom.renderc
+
+[input]
+game_binding = /input/game.input_bindingc
+
+[display]
+width = 640
+height = 360
+high_dpi = 1
+
+[physics]
+scale = 0.02
+
+[script]
+shared_state = 1
+
+[library]
+include_dirs = fabula
+
+[graphics]
+texture_profiles = /main/custom.texture_profiles
+

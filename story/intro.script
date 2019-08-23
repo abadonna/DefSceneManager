@@ -1,0 +1,69 @@
+return
+{
+	{hide	= "teresa,office"},
+	{set	= {FOO = 1}},
+	
+	{scale 	= "office", x = 1.1, y = 1.1},
+	{show 	= "office", speed = 0.5},
+	{scale 	= "office", x = 1, y = 1, speed = 1.5, easing = gui.EASING_INOUTQUAD},
+
+	{delay 	= 0.5},
+
+	{label 	= "menu"},
+	{clear = "all"},
+	{select	= 
+	{
+		{text = "Simple text", action = {goto = "text"}},
+		{text = "Dialog", action = {goto = "dialog"}},
+		{text = "FOO +1", action = {goto = "hud"}}
+	}, delay = 0.1, speed = 0.25},
+
+	------------------------------------------
+	{label 	= "text"},
+	{clear = "all"},
+	{text 	= [[Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor.
+	Aenean massa.]], speaker = "Instant text"},
+
+	{text 	= [[Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor.
+	Aenean massa.]], speaker = "Typewriter", speed = 0.01},
+
+	{goto 	= "menu"},
+	------------------------------------------
+	{label 	= "dialog"},
+	{clear = "all"},
+	{move	= "teresa", x = 490, easing = gui.EASING_OUTQUAD, speed = 1},
+	{show 	= "teresa", speed = 0.5},
+	{delay	= 0.5},
+
+	{text_move = {x = 140}},
+	{portrait = "teresa", animate = {
+		{prop = "opacity", from = 0, to = 1, speed = 0.5},
+		{prop = "move", from = {x = -20}, to = {x = 0}, speed = 0.7, easing = gui.EASING_OUTBACK}}
+	},
+	{text 	= [[Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
+	Aenean commodo ligula eget dolor.]], speed= 0.01},
+
+	{clear 	= "text"},
+	{portrait = "", animate = {
+		{prop = "opacity", from = 1, to = 0, speed = 0.2},
+		{prop = "move", from = {}, to = {x = -10}, speed = 1, easing = gui.EASING_OUTCUBIC}}
+	},
+
+	{text_restore = true},
+
+	{text 	= [[Lorem ipsum dolor sit amet,
+	consectetuer adipiscing elit.
+	Aenean commodo ligula eget dolor.]], x = 300, y = 200, speed= 0.01},
+	
+
+	{move	= "teresa", x = 500, easing = gui.EASING_OUTQUAD, speed = 1},
+	{hide 	= "teresa", speed = 0.5},
+	
+	{goto 	= "menu"},
+
+	------------------------------------------
+	{label 	= "hud"},
+
+	{set 	= {FOO = "+1"}},
+	{goto 	= "menu"},
+}
