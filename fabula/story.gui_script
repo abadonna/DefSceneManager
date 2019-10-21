@@ -266,7 +266,8 @@ function on_message(self, message_id, message, sender)
 			gui.animate(self.text_panel, "color.w", 0, gui.EASING_LINEAR, 0.5)
 		end
 
-
+		gui.set_color(node, message.color or get_color(self, node))
+		
 		if message.speed then
 			self.typing = self.typing + 1
 			self.pass = message.pass
@@ -282,7 +283,6 @@ function on_message(self, message_id, message, sender)
 		else
 			gui.set_text(node, text)
 			msg.post("#script", "text_done", {pass = message.pass})
-			gui.set_color(node, message.color or get_color(self, node))
 			self.options[node] = {}
 		end
 
