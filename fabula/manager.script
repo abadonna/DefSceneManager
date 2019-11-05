@@ -207,7 +207,6 @@ local function process(self, action)
 				elseif string.find(v, "-") == 1 then
 					v = tonumber(STATE[k]) - tonumber(string.sub(v, 2))
 				elseif string.find(v, "~") == 1 then
-					math.randomseed(os.time() * 10000000)
 					v = math.random(0, tonumber(string.sub(v, 2)))
 				end
 			end
@@ -410,6 +409,8 @@ function init(self)
 	self.socket = ""
 	self.wait_feedback = false
 	self.resources_pending = 0 
+
+	math.randomseed(os.time())
 	
 	msg.post(".", "acquire_input_focus")
 
