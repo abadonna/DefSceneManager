@@ -297,7 +297,6 @@ function on_message(self, message_id, message, sender)
 	elseif message_id == hash("select") then
 		local total_offset = 0
 		local total = #message.select
-		math.randomseed(os.time() * 1000000000)
 
 		for i = total, 1, -1 do
 			local select = message.select[i]
