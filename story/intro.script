@@ -15,9 +15,16 @@ return
 	{
 		{text = "Simple text", action = {goto = "text"}},
 		{text = "Dialog", action = {goto = "dialog"}},
+		{text = "Template", action = {goto = "template"}},
 		{text = "FOO +1", action = {goto = "hud"}}
 	}, delay = 0.1, speed = 0.25},
 
+
+	------------------------------------------
+	{label 	= "template"},
+	{clear = "all"},
+	{typewriter = [[Lorem ipsum dolor sit amet]], speaker = "Template"},
+	{goto 	= "menu"},
 	------------------------------------------
 	{label 	= "text"},
 	{clear = "all"},

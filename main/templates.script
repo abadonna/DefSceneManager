@@ -1,0 +1,22 @@
+local templates = {
+	typewriter = {
+		{
+			text 	= "{{value}}", 
+			speaker = "{{speaker}}", 
+			speed = 0.01
+		},
+		{
+			text 	= [[{{value}}
+{{value}}]],
+			color = vmath.vector4(1,0,0,1),
+			speaker = "same text twice", 
+			speed = 0.01
+		}
+	}
+}
+
+function init(self)
+	for k, v in pairs(templates) do
+		msg.post("story#script", "register_template", {name = k, template = v})
+	end
+end
