@@ -127,7 +127,7 @@ local function process_template(template, action, name)
 		if type(value) == "string" then
 			for k, param in pairs(action) do
 				k = (k == name) and "value" or k
-				clone[key] = string.gsub(clone[key], "{{" .. k .. "}}", param)
+				clone[key] = string.gsub(clone[key], "{{" .. k .. "}}", tostring(param))
 			end
 		end
 	end
