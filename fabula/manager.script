@@ -131,6 +131,27 @@ local function process_template(template, action, name)
 			end
 		end
 	end
+	
+	if action.condition then
+		if clone.condition then
+			for k, v in pairs(action.condition) do
+				clone.condition[k] = v
+			end
+		else
+			clone.condition = action.condition
+		end
+	end
+
+	if action.condition_any then
+		if clone.condition_any then
+			for k, v in pairs(action.condition_any) do
+				clone.condition_any[k] = v
+			end
+		else
+			clone.condition_any = action.condition_any
+		end
+	end
+
 	return clone
 end
 
