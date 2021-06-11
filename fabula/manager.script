@@ -333,7 +333,11 @@ local function process(self, action)
 	end
 	
 	if action.goto then
-		local target = format_string(self, action.goto)
+		action.go = action.goto
+	end
+
+	if action.go then
+		local target = format_string(self, action.go)
 		for i, v in ipairs(self.actions) do
 			if v.label == target then
 				self.index = i
