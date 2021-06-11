@@ -13,10 +13,10 @@ return
 	{clear = "all"},
 	{select	= 
 	{
-		{text = "Simple text", action = {goto = "text"}},
-		{text = "Dialog", action = {goto = "dialog"}},
-		{text = "Template", action = {goto = "template"}},
-		{text = "FOO +1", action = {goto = "hud"}}
+		{text = "Simple text", action = {go = "text"}},
+		{text = "Dialog", action = {go = "dialog"}},
+		{text = "Template", action = {go = "template"}},
+		{text = "FOO +1", action = {go = "hud"}}
 	}, delay = 0.1, speed = 0.25},
 
 
@@ -24,7 +24,7 @@ return
 	{label 	= "template"},
 	{clear = "all"},
 	{typewriter = [[Lorem ipsum dolor sit amet]], speaker = "Template"},
-	{goto 	= "menu"},
+	{go 	= "menu"},
 	------------------------------------------
 	{label 	= "text"},
 	{clear = "all"},
@@ -34,7 +34,7 @@ return
 	{text 	= [[Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor.
 	Aenean massa.]], speaker = "Typewriter", speed = 0.01},
 
-	{goto 	= "menu"},
+	{go 	= "menu"},
 	------------------------------------------
 	{label 	= "dialog"},
 	{clear = "all"},
@@ -66,11 +66,11 @@ return
 	{move	= "teresa", x = 500, easing = gui.EASING_OUTQUAD, speed = 1},
 	{hide 	= "teresa", speed = 0.5},
 	
-	{goto 	= "menu"},
+	{go 	= "menu"},
 
 	------------------------------------------
 	{label 	= "hud"},
 
 	{set 	= {FOO = "+1"}},
-	{goto 	= "menu"},
+	{go 	= "menu"},
 }
