@@ -121,17 +121,27 @@ local function check_condition(self, action)
 end
 
 local function process_template(template, action, name)
-	local clone = {}
-	for key, value in pairs(template) do
-		clone[key] = value
-		if type(value) == "string" then
-			for k, param in pairs(action) do
-				k = (k == name) and "value" or k
-				clone[key] = string.gsub(clone[key], "{{" .. k .. "}}", tostring(param))
+
+	local function make_clone(obj)
+		local copy = {}
+		for key, value in pairs(obj) do
+			if type(value) == "table" then
+				copy[key] = make_clone(value)
+			else
+				copy[key] = value
+				if type(value) == "string" then
+					for k, param in pairs(action) do
+						k = (k == name) and "value" or k
+						copy[key] = string.gsub(copy[key], "{{" .. k .. "}}", tostring(param))
+					end
+				end
 			end
 		end
+		return copy
 	end
-	
+
+	local clone  = make_clone(template)
+
 	if action.condition then
 		if clone.condition then
 			for k, v in pairs(action.condition) do
