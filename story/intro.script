@@ -29,10 +29,10 @@ return
 	{label 	= "text"},
 	{clear = "all"},
 	{text 	= [[Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor.
-	Aenean massa.]], speaker = "Instant text"},
+Aenean massa.]], speaker = "Instant text"},
 
-	{text 	= [[Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor.
-	Aenean massa.]], speaker = "Typewriter", speed = 0.01},
+	{text 	= [[Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. 
+Aenean massa.]], speaker = "Typewriter", speed = 0.01},
 
 	{go 	= "menu"},
 	------------------------------------------
@@ -48,7 +48,7 @@ return
 		{prop = "move", from = {x = -20}, to = {x = 0}, speed = 0.7, easing = gui.EASING_OUTBACK}}
 	},
 	{text 	= [[Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
-	Aenean commodo ligula eget dolor.]], speed= 0.01},
+Aenean commodo ligula eget dolor.]], speed= 0.01},
 
 	{clear 	= "text"},
 	{portrait = "", animate = {
@@ -59,8 +59,8 @@ return
 	{text_restore = true},
 
 	{text 	= [[Lorem ipsum dolor sit amet,
-	consectetuer adipiscing elit.
-	Aenean commodo ligula eget dolor.]], x = 300, y = 200, speed= 0.01},
+consectetuer adipiscing elit.
+Aenean commodo ligula eget dolor.]], x = 300, y = 200, speed= 0.01},
 	
 
 	{move	= "teresa", x = 500, easing = gui.EASING_OUTQUAD, speed = 1},

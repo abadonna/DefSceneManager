@@ -195,7 +195,7 @@ local function process(self, action)
 	end
 	
 	if action.delay and action.select == nil then
-		timer.delay(action.delay, false, process)
+		self.delay_timer = timer.delay(action.delay, false, process)
 		return
 	end
 
@@ -437,6 +437,8 @@ function on_message(self, message_id, message, sender)
 			self.wait_feedback = true
 		end
 	elseif message_id == hash("action") then
+		timer.cancel(self.proc_timer)
+		timer.cancel(self.delay_timer)
 		process(self, message.action)
 	elseif message_id == hash("layout") then
 		msg.post(self.socket .. ":/controller", "reset")
@@ -463,8 +465,8 @@ end
 function on_input(self, action_id, action)
 	if action_id == hash("click") and action.pressed and self.wait_feedback then
 		self.wait_feedback = false
-        process(self)
-    end
+		self.proc_timer = timer.delay(0.1, false, process)
+	end
 end
 
 function init(self)
@@ -473,6 +475,8 @@ function init(self)
 	self.socket = ""
 	self.wait_feedback = false
 	self.resources_pending = 0 
+	self.proc_timer = 0
+	self.delay_timer = 0
 
 	self.templates = {}
 
