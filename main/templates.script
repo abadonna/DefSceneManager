@@ -4,14 +4,30 @@ local templates = {
 			text 	= "{{value}}", 
 			speaker = "{{speaker}}", 
 			speed = 0.01
-		},
+		}
+	},
+	narrator = {
 		{
-			text 	= [[{{value}}
-{{value}}]],
-			color = vmath.vector4(1,0,0,1),
-			speaker = "same text twice", 
+			text 	= "{{value}}",
 			speed = 0.01
 		}
+	},
+	example = {
+		{hide	= "teresa,office"},
+
+		{scale 	= "office", x = 1.1, y = 1.1},
+		{show 	= "office", speed = 0.5},
+		{scale 	= "office", x = 1, y = 1, speed = 1.5, easing = gui.EASING_INOUTQUAD},
+		{delay	= 0.5},
+		{text = "Example of template"},
+		{clear	= "all"},
+
+		{move	= "teresa", x = 490, easing = gui.EASING_OUTQUAD, speed = 1},
+		{show 	= "teresa", speed = 0.5},
+		{delay	= 0.5},
+		
+		{text = "text 2"},
+		{text = "text 3"},
 	}
 }
 

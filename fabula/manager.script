@@ -4,165 +4,11 @@ go.property("local_data", true)
 go.property("proxies", msg.url("."))
 local play
 
+local UTILS = require "fabula.utils" 
 local STATE = require "fabula.state" 
 
 local function url_to_scene(self, scene)
 	return msg.url(self.proxies.socket, self.proxies.path, scene)
-end
-
-local function format_string(self, s)
-	local result = s
-	for key, val in pairs(STATE) do
-		if type(val) ~= "boolean" then
-			result = string.gsub(result, "{" .. key .. "}", val)
-		end
-	end
-	return result
-end
-
-local function check_condition(self, action)
-	if action.condition and action.condition_any then
-		return check_condition(self, {condition = action.condition}) 
-		and check_condition(self, {condition_any = action.condition_any})
-	end
-	
-	local condition = action.condition or action.condition_any
-	if not condition then
-		return true
-	end
-	
-	local result = action.condition ~= nil
-	
-	for k, v in pairs(condition) do
-		local check = STATE[k]
-		local test = true
-		local is_ok = true
-		if check == nil then
-			local base_check = check
-			local suffix_idx = string.find(string.reverse(k), "_")
-			local suffix = nil
-			if suffix_idx then
-				suffix = string.sub(k, -suffix_idx, -1)
-				k = string.sub(k, 1, #k - suffix_idx)
-				base_check = STATE[k]
-			end
-			
-			if not base_check then
-				base_check = 0
-			end
-			
-			if type(base_check) == "number" then
-				local values = {v}
-				if type(v) == "string" then
-					values = {tonumber(STATE[v]) or tonumber(v) or 0}
-				elseif type(v) == "table" then
-					values = {}
-					for _, val in ipairs(v) do
-						table.insert(values, tonumber(STATE[val]) or tonumber(val) or 0)
-					end
-				end
-				
-				if suffix == "_lte" then
-					test = false
-					for _, value in ipairs(values) do
-						if value < base_check then
-							is_ok = false
-							break
-						end
-					end
-				elseif suffix == "_lt" then
-					test = false
-					for _, value in ipairs(values) do
-						if value <= base_check then
-							is_ok = false
-							break
-						end
-					end
-				elseif suffix == "_gte" then
-					test = false
-					for _, value in ipairs(values) do
-						if value > base_check then
-							is_ok = false
-							break
-						end
-					end
-				elseif suffix == "_gt" then
-					test = false
-					for _, value in ipairs(values) do
-						if value >= base_check then
-							is_ok = false
-							break
-						end
-					end
-				end
-			end
-		end
-		
-		if test and (not v or v == 0) and not check then
-			test = false
-		end
-		
-		if test and type(check) == "string" then
-			v = format_string(self, v)
-		end
-		
-		if test and v ~= check then
-			is_ok = false
-		end
-		
-		if action.condition then
-			result = result and is_ok
-		else
-			result = result or is_ok
-		end
-	end
-	
-	return result
-end
-
-local function process_template(template, action, name)
-
-	local function make_clone(obj)
-		local copy = {}
-		for key, value in pairs(obj) do
-			if type(value) == "table" then
-				copy[key] = make_clone(value)
-			else
-				copy[key] = value
-				if type(value) == "string" then
-					for k, param in pairs(action) do
-						k = (k == name) and "value" or k
-						copy[key] = string.gsub(copy[key], "{{" .. k .. "}}", tostring(param))
-					end
-				end
-			end
-		end
-		return copy
-	end
-
-	local clone  = make_clone(template)
-
-	if action.condition then
-		if clone.condition then
-			for k, v in pairs(action.condition) do
-				clone.condition[k] = v
-			end
-		else
-			clone.condition = action.condition
-		end
-	end
-
-	if action.condition_any then
-		if clone.condition_any then
-			for k, v in pairs(action.condition_any) do
-				clone.condition_any[k] = v
-			end
-		else
-			clone.condition_any = action.condition_any
-		end
-	end
-
-	return clone
 end
 
 local function process(self, action)
@@ -176,7 +22,7 @@ local function process(self, action)
 		self.index = self.index + 1
 	end
 	
-	if not check_condition(self, action) then
+	if not UTILS.check_condition(action) then
 		process(self)
 		return
 	end
@@ -186,7 +32,7 @@ local function process(self, action)
 			self.index = self.index - 1
 			table.remove(self.actions, self.index)
 			for i, t in ipairs(template) do
-				local data = process_template(t, action, name)
+				local data = UTILS.process_template(t, action, name)
 				table.insert(self.actions, self.index - 1 + i, data)
 			end
 			process(self)
@@ -226,7 +72,7 @@ local function process(self, action)
 	
 	if action.text then
 		if string.find(action.text, "{") then
-			clone.formatted_text = format_string(self, action.text)
+			clone.formatted_text = UTILS.format_string(action.text)
 		end
 		msg.post("#gui", "text", clone)
 		return
@@ -237,7 +83,7 @@ local function process(self, action)
 		clone.select = {}
 		--local clone = {select = {}, spacing = action.spacing, speed = action.speed, delay = action.delay, random = action.random}
 		for _, v in ipairs(action.select) do
-			if check_condition(self, v) then
+			if UTILS.check_condition(v) then
 				table.insert(clone.select, v)
 			end
 		end
@@ -259,7 +105,7 @@ local function process(self, action)
 	if action.set then
 		for k, v in pairs(action.set) do
 			if type(v) == "string" then
-				v = format_string(self, v)
+				v = UTILS.format_string(v)
 				if string.find(v, "+") == 1 then
 					v = tonumber(STATE[k]) + tonumber(string.sub(v, 2))
 				elseif string.find(v, "-") == 1 then
@@ -347,7 +193,7 @@ local function process(self, action)
 	end
 
 	if action.go then
-		local target = format_string(self, action.go)
+		local target = UTILS.format_string(action.go)
 		for i, v in ipairs(self.actions) do
 			if v.label == target then
 				self.index = i

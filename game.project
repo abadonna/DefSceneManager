@@ -1,10 +1,12 @@
 [project]
 title = DefSceneManager
-version = 1.0
+version = 1.1
 custom_resources = story/
+dependencies#0 = https://github.com/abadonna/narrator/archive/master.zip
+dependencies#1 = https://github.com/astrochili/defold-lpeg/archive/master.zip
 
 [bootstrap]
-main_collection = /main/main.collectionc
+main_collection = /main/main_ink.collectionc
 render = /main/custom.renderc
 
 [input]
