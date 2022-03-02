@@ -128,9 +128,12 @@ local function process(self, action)
 
 	if action.save then
 		local path = sys.get_save_file(sys.get_config("project.title"), action.save)
+		local story = STATE._STORY
+		STATE._STORY = nil
 		if not sys.save(path, STATE) then
 			pprint("can't save " .. action.save)
 		end
+		STATE._STORY = story
 	end
 
 	if action.load then
@@ -194,6 +197,7 @@ end
 local function init_story(self, book)
 	local story = narrator.initStory(book)
 	story:begin()
+	STATE._STORY = story
 	self.co_progress = coroutine.create(function (answer)
 		while story:canContinue() do
 			local paragraphs = story:continue()
