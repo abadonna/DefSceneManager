@@ -199,7 +199,7 @@ local function init_story(self, book)
 	story:begin()
 	STATE._STORY = story
 	self.co_progress = coroutine.create(function (answer)
-		while story:canContinue() do
+		while story:canContinue() or story:canChoose() do
 			local paragraphs = story:continue()
 			for _, paragraph in ipairs(paragraphs) do
 
