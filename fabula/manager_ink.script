@@ -188,7 +188,7 @@ local function exec_command(self, command)
 		end
 		
 		self.scene = data[1]
-		msg.post(url_to_scene(self, scene), "async_load")
+		msg.post(url_to_scene(self, self.scene), "async_load")
 		coroutine.yield()
 	end
 	
