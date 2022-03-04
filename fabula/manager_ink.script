@@ -210,24 +210,26 @@ local function init_story(self, book)
 				end
 				
 				local text = paragraph.text
-				local data = text:split(":")
-				local name = table.remove(data, 1)
-				local actions = check_template(self, name, table.concat(data, ":"))
-		
-				if #actions == 0 and self.default_template then
-					actions = check_template(self, self.default_template, text)
-				end
 
-				for _, action in ipairs(actions) do 
-					process(self, action)
+				if #text > 0 then
+					local data = text:split(":")
+					local name = table.remove(data, 1)
+					local actions = check_template(self, name, table.concat(data, ":"))
+			
+					if #actions == 0 and self.default_template then
+						actions = check_template(self, self.default_template, text)
+					end
+
+					for _, action in ipairs(actions) do 
+						process(self, action)
+					end
+					
+					if #actions == 0 then
+						msg.post("#gui", "text", {text = text})
+						self.wait_feedback = true
+						coroutine.yield()
+					end
 				end
-				
-				if #actions == 0 then
-					msg.post("#gui", "text", {text = text})
-					self.wait_feedback = true
-					coroutine.yield()
-				end
-				--pprint(text)
 			end
 
 			-- If there is no choice it seems like the game is over
