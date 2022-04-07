@@ -26,6 +26,7 @@ end
 function init(self)
 	self.inclusions = {}
 	self.templates = {}
+	self.choice_actions = {}
 	msg.post(".", "acquire_input_focus")
 end
 
@@ -239,8 +240,17 @@ local function init_story(self, book)
 			local choices = story:getChoices()
 			local clone = {select = {}}
 			for i, choice in ipairs(choices) do
-				--print(i .. ') ' .. choice.text)
-				table.insert(clone.select, {text = choice.text, action = i})
+				local is_button = true
+				for _, pattern in ipairs(self.choice_actions) do
+					if string.find(choice.text, pattern) ~= nil then
+						msg.post(self.scene .. ":/controller", "choice", {text = choice.text, action = i})
+						is_button = false
+						break
+					end
+				end
+				if is_button then
+					table.insert(clone.select, {text = choice.text, action = i})
+				end
 			end
 			msg.post("#gui", "clear", {clear = "all"})
 			msg.post("#gui", "select", clone)
@@ -269,6 +279,9 @@ function on_message(self, message_id, message, sender)
 
 	elseif message_id == hash("register_template") then
 		self.templates[message.name] = message.template
+
+	elseif message_id == hash("register_choice_pattern") then
+		table.insert(self.choice_actions, message.pattern)
 
 	elseif message_id == hash("set_default_template") then
 		self.default_template = message.template
