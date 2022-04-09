@@ -203,32 +203,38 @@ local function init_story(self, book)
 		while story:canContinue() or story:canChoose() do
 			local paragraphs = story:continue()
 			for _, paragraph in ipairs(paragraphs) do
-
+				local skip = false
 				if paragraph.tags then
 					for _, tag in ipairs(paragraph.tags) do
+						if tag == "SKIP" then
+							skip = true
+							break
+						end
 						exec_command(self, tag)
 					end
 				end
+
+				if not skip then
+					local text = paragraph.text
+
+					if #text > 0 then
+						local data = text:split(":")
+						local name = table.remove(data, 1)
+						local actions = check_template(self, name, table.concat(data, ":"))
 				
-				local text = paragraph.text
+						if #actions == 0 and self.default_template then
+							actions = check_template(self, self.default_template, text)
+						end
 
-				if #text > 0 then
-					local data = text:split(":")
-					local name = table.remove(data, 1)
-					local actions = check_template(self, name, table.concat(data, ":"))
-			
-					if #actions == 0 and self.default_template then
-						actions = check_template(self, self.default_template, text)
-					end
-
-					for _, action in ipairs(actions) do 
-						process(self, action)
-					end
-					
-					if #actions == 0 then
-						msg.post("#gui", "text", {text = text})
-						self.wait_feedback = true
-						coroutine.yield()
+						for _, action in ipairs(actions) do 
+							process(self, action)
+						end
+						
+						if #actions == 0 then
+							msg.post("#gui", "text", {text = text})
+							self.wait_feedback = true
+							coroutine.yield()
+						end
 					end
 				end
 			end
