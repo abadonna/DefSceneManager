@@ -52,11 +52,13 @@ local function unpack_action(templates, action, result)
 			return
 		end
 	end
-		
+
 	table.insert(result, action)
 end
 
 local function process(self, action)
+	local scene = self.scene or "main"
+
 	if not UTILS.check_condition(action) then
 		return
 	end
@@ -92,7 +94,7 @@ local function process(self, action)
 	end
 
 	if action.move or action.show or action.hide or action.scale or action.animate or action.msg or action.delete then
-		msg.post(self.scene .. ":/controller", "action", action)
+		msg.post(scene .. ":/controller", "action", action)
 		--to avoid "function called can only access instances within the same collection"
 	end
 
@@ -115,7 +117,7 @@ local function process(self, action)
 			STATE[k] = v
 		end
 		msg.post(".", "state_changed")
-		msg.post(self.scene .. ":/controller", "state_changed")
+		msg.post(scene .. ":/controller", "state_changed")
 	end
 
 	if action.url then
@@ -153,9 +155,9 @@ local function process(self, action)
 		end
 
 		msg.post(".", "state_changed")
-		msg.post(self.scene .. ":/controller", "state_changed")
+		msg.post(scene .. ":/controller", "state_changed")
 	end
-	
+
 end
 
 local function check_template(self, name, value)
@@ -174,12 +176,13 @@ end
 local function exec_command(self, command)
 	local data = command:split(" ")
 	local cmd = table.remove(data, 1)
+
 	local actions = check_template(self, cmd, table.concat(data, " "))
 
 	for _, action in ipairs(actions) do 
 		process(self, action)
 	end
-	
+
 	if cmd == "SCENE" then
 		if self.scene then
 			local url = url_to_scene(self, self.scene)
@@ -187,12 +190,12 @@ local function exec_command(self, command)
 			msg.post(url, "final")
 			msg.post(url, "unload")
 		end
-		
+
 		self.scene = data[1]
 		msg.post(url_to_scene(self, self.scene), "async_load")
 		coroutine.yield()
 	end
-	
+
 end
 
 local function init_story(self, book)
@@ -221,7 +224,7 @@ local function init_story(self, book)
 						local data = text:split(":")
 						local name = table.remove(data, 1)
 						local actions = check_template(self, name, table.concat(data, ":"))
-				
+
 						if #actions == 0 and self.default_template then
 							actions = check_template(self, self.default_template, text)
 						end
@@ -229,7 +232,7 @@ local function init_story(self, book)
 						for _, action in ipairs(actions) do 
 							process(self, action)
 						end
-						
+
 						if #actions == 0 then
 							msg.post("#gui", "text", {text = text})
 							self.wait_feedback = true
@@ -240,7 +243,10 @@ local function init_story(self, book)
 			end
 
 			-- If there is no choice it seems like the game is over
-			if not story:canChoose() then break end
+			if not story:canChoose() then 
+				init_story(self, book) --restart!
+				break 
+			end
 
 			-- Get available choices and output them to the player
 			local choices = story:getChoices()
@@ -249,7 +255,7 @@ local function init_story(self, book)
 				local is_button = true
 				for _, pattern in ipairs(self.choice_actions) do
 					if string.find(choice.text, pattern) ~= nil then
-						msg.post(self.scene .. ":/controller", "choice", {text = choice.text, action = i})
+						msg.post((self.scene or "main") .. ":/controller", "choice", {text = choice.text, action = i})
 						is_button = false
 						break
 					end
@@ -272,7 +278,7 @@ function on_message(self, message_id, message, sender)
 	if message_id == hash("add_inclusion") then
 		local res = sys.load_resource("/story/" .. message.file)
 		table.insert(self.inclusions, res)
-		
+
 	elseif message_id == hash("load_book") then
 		local content = sys.load_resource("/story/" .. message.file)
 		local book = narrator.parseBook(content, self.inclusions)
