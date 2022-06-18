@@ -160,12 +160,12 @@ local function process(self, action)
 
 end
 
-local function check_template(self, name, value)
+local function check_template(self, name, values)
 	local actions = {}
 	for tname, template in pairs(self.templates) do
 		if tname == name then
 			for i, t in ipairs(template) do
-				local data = UTILS.process_template(t, {value = value}, name)
+				local data = UTILS.process_template(t, values, name)
 				unpack_action(self.templates, data, actions)
 			end
 		end
@@ -176,8 +176,20 @@ end
 local function exec_command(self, command)
 	local data = command:split(" ")
 	local cmd = table.remove(data, 1)
+	data = table.concat(data, " ")
 
-	local actions = check_template(self, cmd, table.concat(data, " "))
+	local sp = lpeg.space ^ 0
+	local key = sp * lpeg.C((lpeg.P(1) - lpeg.S(" ="))^1) * sp
+	local value = lpeg.C((lpeg.P(1) - lpeg.S(","))^1)
+	local pair = lpeg.Cg(key * lpeg.P("=") * value) * lpeg.S(",")^0
+	local template = lpeg.Cf(lpeg.Ct("") * pair^0, rawset)
+
+	local params = template:match(data)
+	if params.value == nil then
+		params = {value = data}
+	end
+	
+	local actions = check_template(self, cmd, params)
 
 	for _, action in ipairs(actions) do 
 		process(self, action)
@@ -223,10 +235,10 @@ local function init_story(self, book)
 					if #text > 0 then
 						local data = text:split(":")
 						local name = table.remove(data, 1)
-						local actions = check_template(self, name, table.concat(data, ":"))
+						local actions = check_template(self, name, {value = table.concat(data, ":")})
 
 						if #actions == 0 and self.default_template then
-							actions = check_template(self, self.default_template, text)
+							actions = check_template(self, self.default_template, {value = text})
 						end
 
 						for _, action in ipairs(actions) do 
