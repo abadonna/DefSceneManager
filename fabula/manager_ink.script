@@ -176,7 +176,7 @@ end
 local function exec_command(self, command)
 	local data = command:split(" ")
 	local cmd = table.remove(data, 1)
-	data = table.concat(data, " ")
+	local sdata = table.concat(data, " ")
 
 	local sp = lpeg.space ^ 0
 	local key = sp * lpeg.C((lpeg.P(1) - lpeg.S(" ="))^1) * sp
@@ -184,9 +184,9 @@ local function exec_command(self, command)
 	local pair = lpeg.Cg(key * lpeg.P("=") * value) * lpeg.S(",")^0
 	local template = lpeg.Cf(lpeg.Ct("") * pair^0, rawset)
 
-	local params = template:match(data)
+	local params = template:match(sdata)
 	if params.value == nil then
-		params = {value = data}
+		params = {value = sdata}
 	end
 	
 	local actions = check_template(self, cmd, params)
