@@ -211,8 +211,10 @@ local function exec_command(self, command, paragraphs)
 	if cmd == "LOAD" then
 		local path = sys.get_save_file(sys.get_config("project.title"), data[1])
 		local data = sys.load(path)
-		STATE._STORY:loadState(data)
-		STATE._STORY.restored = true
+		if next(data) then
+			STATE._STORY:loadState(data)
+			STATE._STORY.restored = true
+		end
 	end
 
 	if cmd == "SAVE" then
