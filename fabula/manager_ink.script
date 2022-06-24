@@ -173,7 +173,7 @@ local function check_template(self, name, values)
 	return actions
 end
 
-local function exec_command(self, command)
+local function exec_command(self, command, paragraphs)
 	local data = command:split(" ")
 	local cmd = table.remove(data, 1)
 	local sdata = table.concat(data, " ")
@@ -208,6 +208,71 @@ local function exec_command(self, command)
 		coroutine.yield()
 	end
 
+	if cmd == "LOAD" then
+		local path = sys.get_save_file(sys.get_config("project.title"), data[1])
+		local data = sys.load(path)
+		STATE._STORY:loadState(data)
+		STATE._STORY.restored = true
+	end
+
+	if cmd == "SAVE" then
+		local p = STATE._STORY.paragraphs
+		STATE._STORY.paragraphs = paragraphs
+		local path = sys.get_save_file(sys.get_config("project.title"), data[1])
+		local data = STATE._STORY:saveState()
+		STATE._STORY.paragraphs = p
+
+		if not sys.save(path, data) then
+			pprint("can't save story")
+		end
+	end
+
+end
+
+local function process_paragraphs(self, story)
+	local paragraphs = story:continue()
+
+	for _, paragraph in ipairs(paragraphs) do
+		local skip = false
+		if story.restored then
+			break
+		end
+
+		if paragraph.tags then
+			for _, tag in ipairs(paragraph.tags) do
+				if tag == "SKIP" then
+					skip = true
+					break
+				end
+
+				exec_command(self, tag, paragraphs)
+			end
+		end
+
+		if not skip then
+			local text = paragraph.text
+
+			if #text > 0 then
+				local data = text:split(":")
+				local name = table.remove(data, 1)
+				local actions = check_template(self, name, {value = table.concat(data, ":")})
+
+				if #actions == 0 and self.default_template then
+					actions = check_template(self, self.default_template, {value = text})
+				end
+
+				for _, action in ipairs(actions) do 
+					process(self, action)
+				end
+
+				if #actions == 0 then
+					msg.post("#gui", "text", {text = text})
+					self.wait_feedback = true
+					coroutine.yield()
+				end
+			end
+		end
+	end
 end
 
 local function init_story(self, book)
@@ -216,42 +281,11 @@ local function init_story(self, book)
 	STATE._STORY = story
 	self.co_progress = coroutine.create(function (answer)
 		while story:canContinue() or story:canChoose() do
-			local paragraphs = story:continue()
-			for _, paragraph in ipairs(paragraphs) do
-				local skip = false
-				if paragraph.tags then
-					for _, tag in ipairs(paragraph.tags) do
-						if tag == "SKIP" then
-							skip = true
-							break
-						end
-						exec_command(self, tag)
-					end
-				end
+			process_paragraphs(self, story)
 
-				if not skip then
-					local text = paragraph.text
-
-					if #text > 0 then
-						local data = text:split(":")
-						local name = table.remove(data, 1)
-						local actions = check_template(self, name, {value = table.concat(data, ":")})
-
-						if #actions == 0 and self.default_template then
-							actions = check_template(self, self.default_template, {value = text})
-						end
-
-						for _, action in ipairs(actions) do 
-							process(self, action)
-						end
-
-						if #actions == 0 then
-							msg.post("#gui", "text", {text = text})
-							self.wait_feedback = true
-							coroutine.yield()
-						end
-					end
-				end
+			if story.restored then
+				story.restored = false
+				process_paragraphs(self, story)
 			end
 
 			-- If there is no choice it seems like the game is over
