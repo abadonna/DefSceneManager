@@ -27,6 +27,7 @@ function init(self)
 	self.inclusions = {}
 	self.templates = {}
 	self.choice_actions = {}
+	self.scenes = {}
 	msg.post(".", "acquire_input_focus")
 end
 
@@ -196,14 +197,25 @@ local function exec_command(self, command, paragraphs)
 	end
 
 	if cmd == "SCENE" then
-		if self.scene then
-			local url = url_to_scene(self, self.scene)
-			msg.post(url, "disable")
-			msg.post(url, "final")
-			msg.post(url, "unload")
+		local name = params.value or data[1]
+		if self.scenes[name] then
+			self.scene = name
+			return
 		end
 
-		self.scene = data[1]
+		if not params.keep then
+			local temp = self.scenes
+			self.scenes = {}
+			for key, _ in pairs(temp) do
+				local url = url_to_scene(self, key)
+				msg.post(url, "disable")
+				msg.post(url, "final")
+				msg.post(url, "unload")
+			end
+		end
+
+		self.scene = name
+		self.scenes[name] = true
 		msg.post(url_to_scene(self, self.scene), "async_load")
 		coroutine.yield()
 	end
