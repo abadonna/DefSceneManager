@@ -226,6 +226,8 @@ local function exec_command(self, command, paragraphs)
 		if next(data) then
 			STATE._STORY:loadState(data)
 			STATE._STORY.restored = true
+			msg.post(".", "state_changed")
+			msg.post(self.scene .. ":/controller", "state_changed")
 		end
 	end
 

@@ -348,7 +348,19 @@ function on_message(self, message_id, message, sender)
 						padding = select.padding
 					end
 					width = width + padding * 2
+
+					if self.button_sizes then
+						for _, button_size in ipairs(self.button_sizes) do
+							if width < button_size then
+								width = button_size
+								break
+							end
+						end
+					end
+					
 				end
+
+				
 
 				gui.set_size(button[state], vmath.vector3(width, size.y, 1))
 				if select.x and select.y then
@@ -423,6 +435,11 @@ function on_message(self, message_id, message, sender)
 
 	elseif message_id == hash("text_restore") then
 		gui.set_position(self.text_node, self.text_pos)
+
+
+	elseif message_id == hash("set_button_width") then
+		self.button_sizes = message.sizes
+		table.sort(self.button_sizes)
 
 	elseif message_id == hash("portrait") then
 		if message.portrait == "" then

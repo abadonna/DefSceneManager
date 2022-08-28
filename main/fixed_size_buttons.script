@@ -1,0 +1,4 @@
+function init(self)
+	msg.post(".", "set_button_width", {sizes = {150, 300}})
+end
+
