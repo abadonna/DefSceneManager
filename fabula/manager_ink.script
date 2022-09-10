@@ -192,7 +192,6 @@ local function load_scene(self, name, keep)
 	end
 
 	self.scene = name
-	pprint(self.scenes, name)
 	self.scenes[name] = true
 	msg.post(url_to_scene(self, self.scene), "async_load")
 end
