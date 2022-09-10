@@ -174,6 +174,29 @@ local function check_template(self, name, values)
 	return actions
 end
 
+local function load_scene(self, name, keep)
+	if self.scenes[name] then
+		self.scene = name
+		return
+	end
+
+	if not keep then
+		local temp = self.scenes
+		self.scenes = {}
+		for key, _ in pairs(temp) do
+			local url = url_to_scene(self, key)
+			msg.post(url, "disable")
+			msg.post(url, "final")
+			msg.post(url, "unload")
+		end
+	end
+
+	self.scene = name
+	pprint(self.scenes, name)
+	self.scenes[name] = true
+	msg.post(url_to_scene(self, self.scene), "async_load")
+end
+
 local function exec_command(self, command, paragraphs)
 	local data = command:split(" ")
 	local cmd = table.remove(data, 1)
@@ -189,7 +212,7 @@ local function exec_command(self, command, paragraphs)
 	if params.value == nil then
 		params = {value = sdata}
 	end
-	
+
 	local actions = check_template(self, cmd, params)
 
 	for _, action in ipairs(actions) do 
@@ -198,25 +221,7 @@ local function exec_command(self, command, paragraphs)
 
 	if cmd == "SCENE" then
 		local name = params.value or data[1]
-		if self.scenes[name] then
-			self.scene = name
-			return
-		end
-
-		if not params.keep then
-			local temp = self.scenes
-			self.scenes = {}
-			for key, _ in pairs(temp) do
-				local url = url_to_scene(self, key)
-				msg.post(url, "disable")
-				msg.post(url, "final")
-				msg.post(url, "unload")
-			end
-		end
-
-		self.scene = name
-		self.scenes[name] = true
-		msg.post(url_to_scene(self, self.scene), "async_load")
+		load_scene(self, name, params.keep)
 		coroutine.yield()
 	end
 
@@ -346,10 +351,15 @@ function on_message(self, message_id, message, sender)
 		local book = narrator.parseBook(content, self.inclusions)
 		init_story(self, book)
 
+	elseif message_id == hash("load_scene") then
+		load_scene(self, message.scene, message.keep)
+
 	elseif message_id == hash("action") then
 		msg.post("#gui", "clear", {clear = "all"})
 		self.answer = message.action
-		coroutine.resume(self.co_progress) 
+		if self.co_progress then
+			coroutine.resume(self.co_progress) 
+		end
 
 	elseif message_id == hash("register_template") then
 		self.templates[message.name] = message.template
@@ -363,7 +373,9 @@ function on_message(self, message_id, message, sender)
 	elseif message_id == hash("proxy_loaded") then
 		msg.post(sender, "init")
 		msg.post(sender, "enable")
-		coroutine.resume(self.co_progress) 
+		if self.co_progress then
+			coroutine.resume(self.co_progress) 
+		end
 	end
 end
 
