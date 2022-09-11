@@ -7,7 +7,7 @@ local function url_to_scene(self, scene)
 	return msg.url(self.proxies.socket, self.proxies.path, scene)
 end
 
-local narrator = require('narrator.narrator')
+local narrator = require "narrator.narrator"
 
 function string:split(sep)
 	if sep == nil then
