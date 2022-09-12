@@ -177,7 +177,7 @@ end
 local function load_scene(self, name, keep)
 	if self.scenes[name] then
 		self.scene = name
-		return
+		return false
 	end
 
 	if not keep then
@@ -194,6 +194,7 @@ local function load_scene(self, name, keep)
 	self.scene = name
 	self.scenes[name] = true
 	msg.post(url_to_scene(self, self.scene), "async_load")
+	return true
 end
 
 local function exec_command(self, command, paragraphs)
@@ -220,8 +221,10 @@ local function exec_command(self, command, paragraphs)
 
 	if cmd == "SCENE" then
 		local name = params.value or data[1]
-		load_scene(self, name, params.keep)
-		coroutine.yield()
+
+		if load_scene(self, name, params.keep) then
+			coroutine.yield()
+		end
 	end
 
 	if cmd == "LOAD" then
