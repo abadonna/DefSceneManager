@@ -257,12 +257,12 @@ local function process_paragraphs(self, story)
 
 	for _, paragraph in ipairs(paragraphs) do
 		local skip = false
-		if story.restored then
-			break
-		end
 
 		if paragraph.tags then
 			for _, tag in ipairs(paragraph.tags) do
+				if story.restored then
+					return
+				end
 				if tag == "SKIP" then
 					skip = true
 					break
@@ -270,6 +270,10 @@ local function process_paragraphs(self, story)
 
 				exec_command(self, tag, paragraphs)
 			end
+		end
+
+		if story.restored then
+			return
 		end
 
 		if not skip then
