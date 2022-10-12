@@ -340,7 +340,13 @@ local function init_story(self, book)
 			msg.post("#gui", "clear", {clear = "all"})
 			msg.post("#gui", "select", clone)
 			coroutine.yield()
-			story:choose(self.answer)
+
+			if not story.restored and self.answer then
+				story:choose(self.answer)
+				self.answer = nil
+			end
+
+
 		end
 	end)
 
@@ -375,6 +381,21 @@ function on_message(self, message_id, message, sender)
 
 	elseif message_id == hash("set_default_template") then
 		self.default_template = message.template
+
+	elseif message_id == hash("execute") then
+		self.co_exec = coroutine.create(function ()
+			exec_command(self, message.command, STATE._STORY.paragraphs)
+		end)
+		coroutine.resume(self.co_exec) 
+
+	elseif message_id == hash("save") then
+		exec_command(self, "SAVE " .. message.slot, STATE._STORY.paragraphs)
+
+	elseif message_id == hash("load") then
+		exec_command(self, "LOAD " .. message.slot, STATE._STORY.paragraphs)
+		if self.co_progress then
+			coroutine.resume(self.co_progress) 
+		end
 
 	elseif message_id == hash("proxy_loaded") then
 		msg.post(sender, "init")
