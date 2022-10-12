@@ -355,8 +355,12 @@ end
 
 function on_message(self, message_id, message, sender)
 	if message_id == hash("add_inclusion") then
-		local res = sys.load_resource("/story/" .. message.file)
-		table.insert(self.inclusions, res)
+		if message.file then
+			local res = sys.load_resource("/story/" .. message.file)
+			table.insert(self.inclusions, res)
+		else
+			table.insert(self.inclusions, message.text)
+		end
 
 	elseif message_id == hash("load_book") then
 		local content = sys.load_resource("/story/" .. message.file)
