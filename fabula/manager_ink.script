@@ -1,4 +1,5 @@
 go.property("proxies", msg.url("."))
+go.property("restart_on_done", true)
 
 local UTILS = require "fabula.utils" 
 local STATE = require "fabula.state" 
@@ -317,7 +318,10 @@ local function init_story(self, book)
 
 			-- If there is no choice it seems like the game is over
 			if not story:canChoose() then 
-				init_story(self, book) --restart!
+				if self.restart_on_done then
+					init_story(self, book) --restart!
+				end
+				msg.post(".", "restart")
 				break 
 			end
 
