@@ -90,7 +90,7 @@ local function process(self, action)
 			action.formatted_text = UTILS.format_string(action.text)
 		end
 		msg.post("#gui", "text", action)
-		self.wait_feedback = true
+		self.wait_feedback = false
 		coroutine.yield()
 		return
 	end
@@ -366,6 +366,9 @@ function on_message(self, message_id, message, sender)
 			table.insert(self.inclusions, message.text)
 		end
 
+	elseif message_id == hash("text_done") then
+		self.wait_feedback = true
+		
 	elseif message_id == hash("load_book") then
 		local content = sys.load_resource("/story/" .. message.file)
 		local book = narrator.parseBook(content, self.inclusions)
